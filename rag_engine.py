@@ -15,7 +15,7 @@ class RAGEngine:
     Returns concise, friendly answers suitable for a smart-home assistant fallback.
     """
 
-    def __init__(self, kb_path: str = "smart_home_knowledge.txt"):
+    def __init__(self, kb_path: str = "knowledge.txt"):
         self.kb_path = kb_path
         self.qa_chain = self._load_qa_chain()
 
@@ -49,11 +49,9 @@ class RAGEngine:
         processed_query = self._preprocess_query(query_text)
 
         try:
-            # Use .run which typically returns a single textual answer
-            response = self.qa_chain.run(processed_query)
-            return self._postprocess_response(response)
+            response = self.qa_chain.invoke({"query": processed_query})
+            return self._postprocess_response(response["result"])
         except Exception as e:
-            # Return a friendly error message (keeps CLI stable)
             return f"Error during RAG query: {str(e)}"
 
     def _preprocess_query(self, query_text: str) -> str:
