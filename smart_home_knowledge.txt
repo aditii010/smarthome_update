@@ -1,0 +1,39 @@
+A smart home is a residence equipped with smart devices such as lights, locks, thermostats, and sensors that can be controlled remotely or automatically.
+
+Smart devices allow users to automate tasks, reduce energy consumption, and control appliances via voice, app, or assistant.
+
+You can control the following devices and locations in your smart home:
+
+Devices: lights, locks, thermostat  
+Locations: kitchen, bedroom, living_room, kids_room, bathroom, front_door, all
+
+---
+
+Here are example commands you can use to operate your smart home devices:
+
+- Turn on the kitchen light by saying: "turn on the kitchen light"
+- Turn off the kitchen lights by saying: "turn off the kitchen lights"
+- Turn on all lights by saying: "turn on all lights"
+- Turn off all lights by saying: "turn off all lights"
+- To dim the lights, say: "dim the bedroom lights"
+- Lock the front door by saying: "lock the front door"
+- Unlock the front door by saying: "unlock the front door"
+- Set the thermostat to a temperature by saying: "set the thermostat to 22 degrees in the living room"
+- To check if any lights are on, ask: "Are any of the lights on?"
+
+---
+
+Please use device names exactly as listed above (e.g., lights, lock, thermostat) and location names as shown (e.g., kitchen, bedroom, kids_room).
+
+For all-room commands, use the location "all" (e.g., "turn off all lights").
+
+---
+
+Safety notes:
+
+- Certain commands like turning off all lights after 10 PM may require confirmation.
+- Commands to disable security devices or open doors for strangers are blocked for safety.
+
+---
+
+Feel free to ask me about any device, location, or command.
