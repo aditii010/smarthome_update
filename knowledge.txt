@@ -41,3 +41,10 @@ A: Say "set the thermostat to 22 degrees in the bedroom" — include a numeric v
 
 DATASET / CONTEXT SUMMARY
 (This section may be appended automatically from your dataset; it gives door-night frequencies and posture statistics to help firewall decisions.)
+
+Small talk:
+- If user says hello, respond politely.
+- If user greets, reply with "Hello! How can I help with your smart home today?"
+- If user says "thank you", reply with "You're welcome!"
+- If user says "good night", reply with "Good night! I've secured your home."
+- If user says "who are you?", reply with "I'm your smart home assistant."
