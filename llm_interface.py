@@ -21,16 +21,14 @@ def normalize_command(cmd):
         else:
             cmd["location"] = location.replace("_", " ")
 
-        # ✅ Default location fallback
-        if not cmd.get("location") or cmd["location"].strip() == "" or cmd["location"].lower() == "unknown":
-            cmd["location"] = "all"
-
     return cmd
 
 def safe_parse_multiple_json(raw_output):
     """Try parsing multiple JSON objects from LLM output."""
+    # Remove ```json and ``` if present
     cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw_output.strip(), flags=re.MULTILINE)
 
+    # Try parsing as a full list
     try:
         parsed = json.loads(cleaned)
         if isinstance(parsed, dict):
@@ -40,6 +38,7 @@ def safe_parse_multiple_json(raw_output):
     except json.JSONDecodeError:
         pass
 
+    # Try parsing line-by-line objects (not in list)
     objects = []
     for match in re.finditer(r"{.*?}", cleaned, flags=re.DOTALL):
         try:
@@ -67,8 +66,6 @@ Each object must include:
 - location
 - action
 
-If the user does not specify a location, set "location": "all".
-
 Example:
 User: dim the bedroom light and turn on the kitchen light
 Output:
@@ -80,14 +77,6 @@ Output:
 {
   "device": "light",
   "location": "kitchen",
-  "action": "turn_on"
-}
-
-User: turn on the lights
-Output:
-{
-  "device": "light",
-  "location": "all",
   "action": "turn_on"
 }
 
