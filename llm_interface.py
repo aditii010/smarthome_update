@@ -1,4 +1,4 @@
-# scripts/llm_interface.py
+#llm_interface.py
 
 import subprocess
 import json
@@ -21,14 +21,16 @@ def normalize_command(cmd):
         else:
             cmd["location"] = location.replace("_", " ")
 
+        # ✅ Default location fallback
+        if not cmd.get("location") or cmd["location"].strip() == "" or cmd["location"].lower() == "unknown":
+            cmd["location"] = "all"
+
     return cmd
 
 def safe_parse_multiple_json(raw_output):
     """Try parsing multiple JSON objects from LLM output."""
-    # Remove ```json and ``` if present
     cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw_output.strip(), flags=re.MULTILINE)
 
-    # Try parsing as a full list
     try:
         parsed = json.loads(cleaned)
         if isinstance(parsed, dict):
@@ -38,7 +40,6 @@ def safe_parse_multiple_json(raw_output):
     except json.JSONDecodeError:
         pass
 
-    # Try parsing line-by-line objects (not in list)
     objects = []
     for match in re.finditer(r"{.*?}", cleaned, flags=re.DOTALL):
         try:
@@ -51,15 +52,22 @@ def safe_parse_multiple_json(raw_output):
 
 def query_llm(user_input):
     system_prompt = """
-You are a smart home assistant. Your job is to understand the user's natural language commands and convert them into structured actions.
+You are a smart home assistant. Your job is to understand the user's natural language commands and convert them into a structured JSON format.
+
+If the user is asking a general question that is NOT a command, such as "What can I control?", "What are the safety rules?", or is simply greeting you, you MUST return an empty JSON array: [].
 
 Only use the following actions:
 - turn_on
 - turn_off
 - get_status
 - dim
+- set_temperature
+- lock
+- unlock
+- open
+- close
 
-Output format should always be valid JSON. If there are multiple actions, return them as multiple JSON objects separated clearly.
+Output format must always be valid JSON. If there are multiple actions, return them as a single JSON array containing multiple JSON objects.
 
 Each object must include:
 - device
@@ -69,21 +77,23 @@ Each object must include:
 Example:
 User: dim the bedroom light and turn on the kitchen light
 Output:
-{
-  "device": "light",
-  "location": "bedroom",
-  "action": "dim"
-},
-{
-  "device": "light",
-  "location": "kitchen",
-  "action": "turn_on"
-}
+[
+  {
+    "device": "light",
+    "location": "bedroom",
+    "action": "dim"
+  },
+  {
+    "device": "light",
+    "location": "kitchen",
+    "action": "turn_on"
+  }
+]
 
-Now parse the following input and respond only with JSON objects, no explanation.
+Now, parse the following user input and respond ONLY with JSON objects as a single JSON array, with no additional text or explanation.
 """
 
-    full_prompt = system_prompt.strip() + "\nUser: " + user_input.strip()
+    full_prompt = system_prompt.strip() + "\nUser command: " + user_input.strip()
 
     try:
         print(f"[LLM] Prompting Ollama with: {user_input}")
@@ -101,12 +111,10 @@ Now parse the following input and respond only with JSON objects, no explanation
 
         raw_output = result.stdout.decode().strip()
         commands = safe_parse_multiple_json(raw_output)
-
-        if commands:
-            return commands
-        else:
-            print(f"[ERROR] JSON parse failed.\nLLM output:\n{raw_output}")
-            return None
+        
+        # The change in the prompt will cause safe_parse_multiple_json to return an empty list `[]` for non-commands
+        # instead of `None`. The main script's logic will then handle this gracefully.
+        return commands
 
     except subprocess.TimeoutExpired:
         print("[ERROR] Ollama call timed out.")
